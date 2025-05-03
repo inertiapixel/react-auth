@@ -4,9 +4,9 @@ import {
   createContext,
   useState,
   useEffect,
-  FC
+  FC,
 } from 'react';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 import { getToken, setToken, removeToken } from '../utils/tokenStorage';
 import { loginRequest } from '../utils/authClient';
 import {
@@ -24,9 +24,10 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children, config }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
   const [loginError, setLoginError] = useState<string | null>(null);
+  const [shouldRedirect, setShouldRedirect] = useState(false);
   const router = useRouter();
 
-  // ✅ Decode user from JWT
+  // Decode user from JWT
   const decodeUserFromToken = (token: string): User | null => {
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
@@ -50,7 +51,7 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children, config }) => {
     setLoginError(null);
 
     try {
-      //Validate credentials
+      // Validate credentials
       if ('password' in credentials && !credentials.password) {
         throw new Error('Password is required.');
       }
@@ -71,10 +72,9 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children, config }) => {
       setIsAuthenticated(true);
 
       if (config.onLoginSuccess) config.onLoginSuccess(decodedUser);
-      if (config.redirectTo) router.push(config.redirectTo);
+      if (config.redirectTo) setShouldRedirect(true);
     } catch (error) {
       setIsAuthenticated(false);
-
       const message = error instanceof Error ? error.message : 'Login failed';
       setLoginError(message);
       if (config.onLoginFail) config.onLoginFail(message);
@@ -87,8 +87,15 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children, config }) => {
     setIsAuthenticated(false);
 
     if (config.onLogout) config.onLogout();
-    if (config.redirectTo) router.push(config.redirectTo);
+    if (config.redirectTo) setShouldRedirect(true);
   };
+
+  useEffect(() => {
+    if (shouldRedirect && config.redirectTo) {
+      router.push(config.redirectTo);
+      setShouldRedirect(false);
+    }
+  }, [shouldRedirect, config.redirectTo, router]);
 
   return (
     <AuthContext.Provider
