@@ -1,0 +1,26 @@
+# Ignore source code and dev files
+src/
+tests/
+example/
+.vscode/
+node_modules/
+dist/**/*.map
+
+# Ignore config files
+tsconfig.json
+tsconfig.*.json
+jest.config.js
+babel.config.js
+.eslintrc.js
+.prettierrc
+.prettierignore
+.npmignore
+.env
+.env.local
+.env.*.local
+
+# Ignore other project stuff
+*.log
+coverage/
+*.test.ts
+*.test.tsx
