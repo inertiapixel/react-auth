@@ -16,6 +16,7 @@ import {
   AuthResponse,
   LoginPayload,
 } from '../types';
+import { API_BASE_URL } from '../utils/config';
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -81,14 +82,28 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children, config }) => {
     }
   };
 
-  const logout = (): void => {
-    removeToken(config.tokenKey);
+  const logout = async (): Promise<void> => {
+    try {
+      const token = getToken(config.tokenKey); // just retrieves token from localStorage
+      await fetch(`${API_BASE_URL}/auth/logout`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      });
+    } catch (err) {
+      console.error('Logout failed:', err);
+    }
+  
+    removeToken(config.tokenKey); // removes token from storage
     setUser(null);
     setIsAuthenticated(false);
-
+  
     if (config.onLogout) config.onLogout();
-    if (config.redirectTo) setShouldRedirect(true);
+    if (config.redirectTo) router.push(config.redirectTo);
   };
+  
 
   useEffect(() => {
     if (shouldRedirect && config.redirectTo) {

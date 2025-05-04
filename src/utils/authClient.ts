@@ -5,11 +5,10 @@ import {
     AuthResponse,
     User
 } from '../types';
-
-const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || '';
+import { API_BASE_URL } from './config';
 
 export const loginRequest = async (credentials: LoginPayload): Promise<AuthResponse> => {
-  const response = await fetch(`${BASE_URL}/auth/login`, {
+  const response = await fetch(`${API_BASE_URL}/auth/login`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -39,7 +38,7 @@ export const loginRequest = async (credentials: LoginPayload): Promise<AuthRespo
 
   return {
     isAuthenticated: true,
-    message: 'Login successful',
+    message: data.message,
     accessToken: token,
     user
   };
