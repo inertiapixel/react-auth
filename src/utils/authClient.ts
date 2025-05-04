@@ -1,3 +1,4 @@
+'use client';
 import { jwtDecode } from 'jwt-decode';
 import {
     LoginPayload,
@@ -5,9 +6,10 @@ import {
     User
 } from '../types';
 
+const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || '';
 
 export const loginRequest = async (credentials: LoginPayload): Promise<AuthResponse> => {
-  const response = await fetch('/api/auth/login', {
+  const response = await fetch(`${BASE_URL}/auth/login`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
