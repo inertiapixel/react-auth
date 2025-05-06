@@ -18,7 +18,7 @@ export function withAuth<P extends { children?: ReactNode }>(
     const { isAuthenticated, loading, isLoaded } = useAuth();
     const router = useRouter();
     const pathname = usePathname();
-
+ 
     useEffect(() => {
       if (!loading && isLoaded) {
         if (options?.requireAuth && !isAuthenticated) {
