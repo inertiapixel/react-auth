@@ -1,26 +1,21 @@
 'use client';
 
-import { JSX, useEffect } from 'react';
+import { useEffect, ComponentType, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../hooks/useAuth';
 
 interface WithAuthOptions {
   requireAuth?: boolean;
   redirectIfAuthenticated?: boolean;
-  loader?: React.ReactNode;
+  loader?: ReactNode;
 }
 
-export function withAuth<P extends JSX.IntrinsicAttributes>(
-  Component: React.ComponentType<P>,
+export function withAuth<P extends { children?: ReactNode }>(
+  Component: ComponentType<P>,
   options?: WithAuthOptions
-) {
+): ComponentType<P> {
   const WithAuthWrapper = (props: P) => {
-    const {
-      isAuthenticated,
-      loading,
-      isLoaded,
-    } = useAuth();
-
+    const { isAuthenticated, loading, isLoaded } = useAuth();
     const router = useRouter();
 
     useEffect(() => {
@@ -36,7 +31,7 @@ export function withAuth<P extends JSX.IntrinsicAttributes>(
     }, [isAuthenticated, loading, isLoaded, options, router]);
 
     if (!isLoaded || loading) {
-      return options?.loader || <p>Loading...</p>;
+      return <>{options?.loader || <p>Loading...</p>}</>;
     }
 
     return <Component {...props} />;
