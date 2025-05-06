@@ -18,16 +18,21 @@ export function withAuth<P extends { children?: ReactNode }>(
     const { isAuthenticated, loading, isLoaded } = useAuth();
     const router = useRouter();
     const pathname = usePathname();
- 
+
     useEffect(() => {
       if (!loading && isLoaded) {
         if (options?.requireAuth && !isAuthenticated) {
-          const encodedPath = encodeURIComponent(pathname);
-          router.push(`/login?redirectTo=${encodedPath}`);
+          const encodedPath = encodeURIComponent(pathname || '/');
+          const loginUrl = `/login?redirectTo=${encodedPath}`;
+          console.log('loginUrl:',loginUrl);
+
+          if (pathname !== '/login') {
+            router.replace(loginUrl); // use replace to prevent back nav to protected page
+          }
         }
 
         if (options?.redirectIfAuthenticated && isAuthenticated) {
-          router.push('/');
+          router.replace('/');
         }
       }
     }, [isAuthenticated, loading, isLoaded, options, router, pathname]);
