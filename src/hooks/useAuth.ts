@@ -1,5 +1,6 @@
 import { useContext, useState, useEffect } from 'react';
 import { AuthContext } from '../context/AuthProvider';
+import { getToken } from '../utils/tokenStorage';
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
@@ -17,11 +18,6 @@ export const useAuth = () => {
       setIsLoaded(true);
     }
   }, [loading]);
-
-  const getToken = async () => {
-    // Assuming you store the token somewhere like localStorage or a cookie
-    return localStorage.getItem('token') || '';
-  };
 
   const isSignedIn = isAuthenticated;
 

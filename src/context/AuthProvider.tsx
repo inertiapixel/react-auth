@@ -6,7 +6,7 @@ import {
   useEffect,
   FC,
 } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { getToken, setToken, removeToken } from '../utils/tokenStorage';
 import { loginRequest } from '../utils/authClient';
 import {
@@ -21,14 +21,14 @@ import { API_BASE_URL } from '../utils/config';
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: FC<AuthProviderProps> = ({ children, config }) => {
+  const tokenKey = config.tokenKey || 'token';
   const [user, setUser] = useState<User | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
   const [loginError, setLoginError] = useState<string | null>(null);
-  const [shouldRedirect, setShouldRedirect] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
 
-  // Decode user from JWT
   const decodeUserFromToken = (token: string): User | null => {
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
@@ -39,14 +39,14 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children, config }) => {
   };
 
   useEffect(() => {
-    const token = getToken(config.tokenKey);
+    const token = getToken(tokenKey);
     if (token) {
       const decodedUser = decodeUserFromToken(token);
       setUser(decodedUser);
       setIsAuthenticated(true);
     }
     setLoading(false);
-  }, [config.tokenKey]);
+  }, [tokenKey]);
 
   const login = async (credentials: LoginPayload): Promise<void> => {
     setLoginError(null);
@@ -66,14 +66,21 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children, config }) => {
         throw new Error('Access token missing in response.');
       }
 
-      setToken(config.tokenKey, response.accessToken);
+      setToken(tokenKey, response.accessToken);
 
       const decodedUser = decodeUserFromToken(response.accessToken);
       setUser(decodedUser || response.user || null);
       setIsAuthenticated(true);
 
       if (config.onLoginSuccess) config.onLoginSuccess(decodedUser);
-      if (config.redirectTo) setShouldRedirect(true);
+
+      const redirectUrl = searchParams.get('redirectTo');
+      if (redirectUrl) {
+        router.push(redirectUrl);
+      } else if (config.redirectTo) {
+        router.push(config.redirectTo);
+      }
+
     } catch (error) {
       setIsAuthenticated(false);
       const message = error instanceof Error ? error.message : 'Login failed';
@@ -84,7 +91,7 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children, config }) => {
 
   const logout = async (): Promise<void> => {
     try {
-      const token = getToken(config.tokenKey); // just retrieves token from localStorage
+      const token = getToken(tokenKey);
       await fetch(`${API_BASE_URL}/auth/logout`, {
         method: 'POST',
         headers: {
@@ -95,22 +102,18 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children, config }) => {
     } catch (err) {
       console.error('Logout failed:', err);
     }
-  
-    removeToken(config.tokenKey); // removes token from storage
+
+    removeToken(tokenKey);
     setUser(null);
     setIsAuthenticated(false);
-  
-    if (config.onLogout) config.onLogout();
-    if (config.redirectTo) router.push(config.redirectTo);
-  };
-  
 
-  useEffect(() => {
-    if (shouldRedirect && config.redirectTo) {
-      router.push(config.redirectTo);
-      setShouldRedirect(false);
+    if (config.onLogout) config.onLogout();
+
+    const redirectUrl = config.redirectAfterLogout || config.redirectTo;
+    if (redirectUrl) {
+      router.push(redirectUrl);
     }
-  }, [shouldRedirect, config.redirectTo, router]);
+  };
 
   return (
     <AuthContext.Provider
