@@ -1,6 +1,6 @@
 {
     "name": "@inertiapixel/react-auth",
-    "version": "1.1.1",
+    "version": "1.1.2",
     "description": "InertiaPixel: Authentication library for React and Next.js projects, supporting credential, social login, JWT handling, and context-based state.",
     "author": "Md Asif <mdasiff007@gmail.com>",
     "main": "dist/index.js",
