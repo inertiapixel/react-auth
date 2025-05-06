@@ -1,70 +1,74 @@
-import { useContext, useState, useEffect } from 'react';
+'use client';
+
+import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { AuthContext } from '../context/AuthProvider';
+import { useAuth } from '../hooks/useAuth';
 
-export const useAuth = (redirectIfNotAuthenticated = '/login') => {
-  const context = useContext(AuthContext);
+interface WithAuthOptions {
+  requireAuth?: boolean;
+  redirectIfAuthenticated?: boolean;
+  loader?: React.ReactNode;
+}
 
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
+export function withAuth<P extends JSX.IntrinsicAttributes>(
+  Component: React.ComponentType<P>,
+  options?: WithAuthOptions
+) {
+  const WithAuthWrapper = (props: P) => {
+    const {
+      isAuthenticated,
+      loading,
+      isLoaded,
+    } = useAuth();
 
-  const { user, isAuthenticated, loading, loginError, login, logout } = context;
-  const [isLoaded, setIsLoaded] = useState(false);
-  const router = useRouter();
+    const router = useRouter();
 
-  useEffect(() => {
-    if (!loading && !isAuthenticated) {
-      const redirectUrl = `${redirectIfNotAuthenticated}?redirectTo=${window.location.pathname}`;
-      router.push(redirectUrl); // Redirect to login with the current page as `redirectTo`
-    } else {
-      setIsLoaded(true); // Set to true once authentication state is determined
+    useEffect(() => {
+      if (!loading && isLoaded) {
+        if (options?.requireAuth && !isAuthenticated) {
+          router.push('/login');
+        }
+
+        if (options?.redirectIfAuthenticated && isAuthenticated) {
+          router.push('/');
+        }
+      }
+    }, [isAuthenticated, loading, isLoaded, options, router]);
+
+    if (!isLoaded || loading) {
+      return options?.loader || <p>Loading...</p>;
     }
-  }, [loading, isAuthenticated, redirectIfNotAuthenticated, router]);
 
-  const getToken = async () => {
-    // Assuming you store the token somewhere like localStorage or a cookie
-    return localStorage.getItem('token') || '';
+    return <Component {...props} />;
   };
 
-  const isSignedIn = isAuthenticated;
-
-  return {
-    user,
-    isAuthenticated,
-    loading,
-    isLoaded,
-    isSignedIn,
-    getToken,
-    loginError,
-    login,
-    logout,
-  };
-};
+  return WithAuthWrapper;
+}
 
 /*
 
-Usage Example:
+Usage Example
 
-import { useAuth } from '@inertiapixel/react-auth';
+For a protected page:
 
-export default function ProtectedPage() {
-  const { getToken, isLoaded, isSignedIn } = useAuth('/login');
+import { withAuth } from '@inertiapixel/react-auth';
 
-  if (!isLoaded) {
-    return <p>Loading...</p>;
-  }
-
-  if (!isSignedIn) {
-    return <p>Sign in to view this page</p>;
-  }
-
-  const fetchDataFromExternalResource = async () => {
-    const token = await getToken();
-    // Fetch your data with the token, e.g., from an API
-    return data;
-  };
-
-  return <div>Protected Content</div>;
+function DashboardPage() {
+  return <div>Welcome to your dashboard!</div>;
 }
+
+export default withAuth(DashboardPage, { requireAuth: true });
+
+=========
+
+For a login page that redirects if already authenticated:
+
+import { withAuth } from '@inertiapixel/react-auth';
+
+function LoginPage() {
+  return <div>Login Form</div>;
+}
+
+export default withAuth(LoginPage, { redirectIfAuthenticated: true });
+
 */

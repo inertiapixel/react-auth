@@ -1,8 +1,8 @@
 import { useContext, useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { AuthContext } from '../context/AuthProvider';
-import { getToken } from '../utils/tokenStorage';
 
-export const useAuth = () => {
+export const useAuth = (redirectIfNotAuthenticated = '/login') => {
   const context = useContext(AuthContext);
 
   if (!context) {
@@ -10,14 +10,22 @@ export const useAuth = () => {
   }
 
   const { user, isAuthenticated, loading, loginError, login, logout } = context;
-
   const [isLoaded, setIsLoaded] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
-    if (!loading) {
-      setIsLoaded(true);
+    if (!loading && !isAuthenticated) {
+      const redirectUrl = `${redirectIfNotAuthenticated}?redirectTo=${window.location.pathname}`;
+      router.push(redirectUrl); // Redirect to login with the current page as `redirectTo`
+    } else {
+      setIsLoaded(true); // Set to true once authentication state is determined
     }
-  }, [loading]);
+  }, [loading, isAuthenticated, redirectIfNotAuthenticated, router]);
+
+  const getToken = async () => {
+    // Assuming you store the token somewhere like localStorage or a cookie
+    return localStorage.getItem('token') || '';
+  };
 
   const isSignedIn = isAuthenticated;
 
@@ -34,15 +42,14 @@ export const useAuth = () => {
   };
 };
 
-
 /*
 
-Usage
+Usage Example:
 
 import { useAuth } from '@inertiapixel/react-auth';
 
-export default function Page() {
-  const { getToken, isLoaded, isSignedIn } = useAuth();
+export default function ProtectedPage() {
+  const { getToken, isLoaded, isSignedIn } = useAuth('/login');
 
   if (!isLoaded) {
     return <p>Loading...</p>;
@@ -54,12 +61,10 @@ export default function Page() {
 
   const fetchDataFromExternalResource = async () => {
     const token = await getToken();
-    // Add logic to fetch your data with the token, e.g., from an API
+    // Fetch your data with the token, e.g., from an API
     return data;
   };
 
   return <div>Protected Content</div>;
 }
-
-
 */
