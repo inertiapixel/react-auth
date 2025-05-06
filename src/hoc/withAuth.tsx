@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, ComponentType, ReactNode } from 'react';
+import { useEffect, ComponentType, ReactNode, useRef } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '../hooks/useAuth';
 
@@ -18,24 +18,25 @@ export function withAuth<P extends { children?: ReactNode }>(
     const { isAuthenticated, loading, isLoaded } = useAuth();
     const router = useRouter();
     const pathname = usePathname();
- 
+
+    // ❗ Capture the path before redirect — only once
+    const originalPathRef = useRef<string | null>(null);
+    if (!originalPathRef.current && pathname !== '/login') {
+      originalPathRef.current = pathname;
+    }
+
     useEffect(() => {
       if (!loading && isLoaded) {
         if (options?.requireAuth && !isAuthenticated) {
-          const encodedPath = encodeURIComponent(pathname || '/');
-          const loginUrl = `/login?redirectTo=${encodedPath}`;
-          console.log('loginUrl:',loginUrl);
-
-          if (pathname !== '/login') {
-            router.replace(loginUrl); // use replace to prevent back nav to protected page
-          }
+          const redirectPath = encodeURIComponent(originalPathRef.current || '/');
+          router.replace(`/login?redirectTo=${redirectPath}`);
         }
 
         if (options?.redirectIfAuthenticated && isAuthenticated) {
           router.replace('/');
         }
       }
-    }, [isAuthenticated, loading, isLoaded, options, router, pathname]);
+    }, [isAuthenticated, loading, isLoaded]);
 
     if (!isLoaded || loading) {
       return <>{options?.loader || <p>Loading...</p>}</>;
