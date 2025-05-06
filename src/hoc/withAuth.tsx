@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, ComponentType, ReactNode } from 'react';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '../hooks/useAuth';
 
 interface WithAuthOptions {
@@ -17,18 +17,20 @@ export function withAuth<P extends { children?: ReactNode }>(
   const WithAuthWrapper = (props: P) => {
     const { isAuthenticated, loading, isLoaded } = useAuth();
     const router = useRouter();
+    const pathname = usePathname();
 
     useEffect(() => {
       if (!loading && isLoaded) {
         if (options?.requireAuth && !isAuthenticated) {
-          router.push('/login');
+          const encodedPath = encodeURIComponent(pathname);
+          router.push(`/login?redirectTo=${encodedPath}`);
         }
 
         if (options?.redirectIfAuthenticated && isAuthenticated) {
           router.push('/');
         }
       }
-    }, [isAuthenticated, loading, isLoaded, options, router]);
+    }, [isAuthenticated, loading, isLoaded, options, router, pathname]);
 
     if (!isLoaded || loading) {
       return <>{options?.loader || <p>Loading...</p>}</>;
@@ -39,6 +41,7 @@ export function withAuth<P extends { children?: ReactNode }>(
 
   return WithAuthWrapper;
 }
+
 
 /*
 
