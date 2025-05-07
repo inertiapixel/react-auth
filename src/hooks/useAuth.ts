@@ -1,9 +1,14 @@
+'use client';
+
 import { useContext, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { AuthContext } from '../context/AuthProvider';
+import { useNavigation } from '../utils/useNavigation';
 
 export const useAuth = (redirectIfNotAuthenticated = '/login') => {
   const context = useContext(AuthContext);
+  const { full, previous } = useNavigation();
+  const router = useRouter();
 
   if (!context) {
     throw new Error('useAuth must be used within an AuthProvider');
@@ -11,34 +16,30 @@ export const useAuth = (redirectIfNotAuthenticated = '/login') => {
 
   const { user, isAuthenticated, loading, loginError, login, logout } = context;
   const [isLoaded, setIsLoaded] = useState(false);
-  const router = useRouter();
 
   useEffect(() => {
     if (!loading && !isAuthenticated) {
-      const redirectUrl = `${redirectIfNotAuthenticated}?redirectTo=${window.location.pathname}`;
-      router.push(redirectUrl); // Redirect to login with the current page as `redirectTo`
+      const redirectPath = previous || full; // fallback to current if previous is null
+      const redirectUrl = `${redirectIfNotAuthenticated}?redirectTo=${encodeURIComponent(redirectPath)}`;
+      router.push(redirectUrl);
     } else {
-      setIsLoaded(true); // Set to true once authentication state is determined
+      setIsLoaded(true);
     }
-  }, [loading, isAuthenticated, redirectIfNotAuthenticated, router]);
+  }, [loading, isAuthenticated, redirectIfNotAuthenticated, router, full, previous]);
 
   const getToken = async () => {
-    // Assuming you store the token somewhere like localStorage or a cookie
     return localStorage.getItem('token') || '';
   };
-
-  const isSignedIn = isAuthenticated;
 
   return {
     user,
     isAuthenticated,
     loading,
     isLoaded,
-    isSignedIn,
     getToken,
     loginError,
     login,
-    logout,
+    logout
   };
 };
 

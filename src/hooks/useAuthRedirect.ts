@@ -7,6 +7,7 @@ type AuthRedirectOptions = {
   redirectIfAuthenticated?: string;   // default: '/' should redirect to home by default
 };
 
+
 export const useAuthRedirect = ({
   redirectIfNotAuthenticated = '/login',
   redirectIfAuthenticated = '/',
