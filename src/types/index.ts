@@ -43,7 +43,7 @@ export interface AuthContextType {
 
 export interface AuthProviderProps {
   children: ReactNode;
-  config: {
+  config?: {
     tokenKey: string;
 
     /**

@@ -15,7 +15,7 @@ export const useAuth = (redirectIfNotAuthenticated = '/login') => {
 
   useEffect(() => {
     if (!loading && !isAuthenticated) {
-      const redirectUrl = `${redirectIfNotAuthenticated}?redirectTo1=${window.location.pathname}`;
+      const redirectUrl = `${redirectIfNotAuthenticated}?redirectTo=${window.location.pathname}`;
       router.push(redirectUrl); // Redirect to login with the current page as `redirectTo`
     } else {
       setIsLoaded(true); // Set to true once authentication state is determined

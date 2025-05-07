@@ -21,7 +21,7 @@ import { API_BASE_URL } from '../utils/config';
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: FC<AuthProviderProps> = ({ children, config }) => {
-  const tokenKey = config.tokenKey || 'token';
+  const tokenKey = config?.tokenKey || 'token';
   const [user, setUser] = useState<User | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -72,12 +72,12 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children, config }) => {
       setUser(decodedUser || response.user || null);
       setIsAuthenticated(true);
 
-      if (config.onLoginSuccess) config.onLoginSuccess(decodedUser);
+      if (config?.onLoginSuccess) config.onLoginSuccess(decodedUser);
 
       const redirectUrl = searchParams.get('redirectTo');
       if (redirectUrl) {
         router.push(redirectUrl);
-      } else if (config.redirectTo) {
+      } else if (config?.redirectTo) {
         router.push(config.redirectTo);
       }
 
@@ -85,7 +85,7 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children, config }) => {
       setIsAuthenticated(false);
       const message = error instanceof Error ? error.message : 'Login failed';
       setLoginError(message);
-      if (config.onLoginFail) config.onLoginFail(message);
+      if (config?.onLoginFail) config.onLoginFail(message);
     }
   };
 
@@ -107,9 +107,9 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children, config }) => {
     setUser(null);
     setIsAuthenticated(false);
 
-    if (config.onLogout) config.onLogout();
+    if (config?.onLogout) config.onLogout();
 
-    const redirectUrl = config.redirectAfterLogout || config.redirectTo;
+    const redirectUrl = config?.redirectAfterLogout || config?.redirectTo;
     if (redirectUrl) {
       router.push(redirectUrl);
     }
