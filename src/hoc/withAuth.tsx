@@ -29,8 +29,7 @@ export function withAuth<P extends { children?: ReactNode }>(
       if (!loading && isLoaded) {
         if (options?.requireAuth && !isAuthenticated) {
           const redirectPath = encodeURIComponent(originalPathRef.current || '/');
-          alert(redirectPath);
-          router.replace(`/login?redirectTo1=${redirectPath}`);
+          router.replace(`/login?redirectTo=${redirectPath}`);
         }
 
         if (options?.redirectIfAuthenticated && isAuthenticated) {
