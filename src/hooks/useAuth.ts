@@ -7,7 +7,7 @@ import { useNavigation } from '../utils/useNavigation';
 
 export const useAuth = (redirectIfNotAuthenticated = '/login') => {
   const context = useContext(AuthContext);
-  const { full, previous } = useNavigation();
+  const { full, previous, current } = useNavigation(); // current = pathname
   const router = useRouter();
 
   if (!context) {
@@ -18,14 +18,16 @@ export const useAuth = (redirectIfNotAuthenticated = '/login') => {
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    if (!loading && !isAuthenticated) {
-      const redirectPath = previous || full; // fallback to current if previous is null
+    const isOnLoginPage = current === redirectIfNotAuthenticated;
+
+    if (!loading && !isAuthenticated && !isOnLoginPage) {
+      const redirectPath = previous || full;
       const redirectUrl = `${redirectIfNotAuthenticated}?redirectTo=${encodeURIComponent(redirectPath)}`;
       router.push(redirectUrl);
-    } else {
+    } else if (!loading) {
       setIsLoaded(true);
     }
-  }, [loading, isAuthenticated, redirectIfNotAuthenticated, router, full, previous]);
+  }, [loading, isAuthenticated, redirectIfNotAuthenticated, router, current, full, previous]);
 
   const getToken = async () => {
     return localStorage.getItem('token') || '';
@@ -39,9 +41,10 @@ export const useAuth = (redirectIfNotAuthenticated = '/login') => {
     getToken,
     loginError,
     login,
-    logout
+    logout,
   };
 };
+
 
 /*
 
