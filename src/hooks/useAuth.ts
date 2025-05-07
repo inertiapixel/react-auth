@@ -7,31 +7,47 @@ import { useNavigation } from '../utils/useNavigation';
 
 export const useAuth = (redirectIfNotAuthenticated = '/login') => {
   const context = useContext(AuthContext);
-  const { full, previous, current } = useNavigation(); // current = pathname
-  const router = useRouter();
-
   if (!context) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
 
-  const { user, isAuthenticated, loading, loginError, login, logout } = context;
+  const {
+    user,
+    isAuthenticated,
+    loading,
+    loginError,
+    login,
+    logout,
+  } = context;
+
   const [isLoaded, setIsLoaded] = useState(false);
+  const router = useRouter();
+
+  // Your custom navigation hook
+  const { current, full } = useNavigation();
 
   useEffect(() => {
     const isOnLoginPage = current === redirectIfNotAuthenticated;
+    const alreadyRedirecting = full.includes('redirectTo=');
 
-    if (!loading && !isAuthenticated && !isOnLoginPage) {
-      const redirectPath = previous || full;
-      const redirectUrl = `${redirectIfNotAuthenticated}?redirectTo=${encodeURIComponent(redirectPath)}`;
+    if (!loading && !isAuthenticated && !isOnLoginPage && !alreadyRedirecting) {
+      const redirectTarget = full.startsWith(redirectIfNotAuthenticated)
+        ? '/'
+        : full;
+
+      const redirectUrl = `${redirectIfNotAuthenticated}?redirectTo=${encodeURIComponent(
+        redirectTarget
+      )}`;
       router.push(redirectUrl);
     } else if (!loading) {
       setIsLoaded(true);
     }
-  }, [loading, isAuthenticated, redirectIfNotAuthenticated, router, current, full, previous]);
+  }, [loading, isAuthenticated, redirectIfNotAuthenticated, router, current, full]);
 
   const getToken = async () => {
     return localStorage.getItem('token') || '';
   };
+
 
   return {
     user,
