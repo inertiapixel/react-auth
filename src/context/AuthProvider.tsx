@@ -79,6 +79,8 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children, config }) => {
         router.push(redirectUrl);
       } else if (config?.redirectTo) {
         router.push(config.redirectTo);
+      } else {
+        router.push('/');
       }
 
     } catch (error) {
