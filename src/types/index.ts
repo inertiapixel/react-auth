@@ -5,7 +5,7 @@ export interface User<T = unknown> {
   name: string;
   email: string;
   role?: string;
-  avatarUrl?: string;
+  avatar?: string;
   extra?: T;
 }
 
@@ -37,6 +37,7 @@ export interface AuthContextType {
   isAuthenticated: boolean;
   loading: boolean;
   login: (credentials: LoginPayload) => Promise<void>;
+  socialLogin: (payload: SocialAuthPayload) => Promise<void>;
   logout: () => void;
   loginError: string | null;
 }
@@ -75,3 +76,13 @@ export interface AuthProviderProps {
     onLogout?: () => void;
   };
 }
+
+export type OTPPayload = {
+  phone: string;
+  otp: string;
+};
+
+export type SocialAuthPayload = {
+  code: string;
+  provider: 'google' | 'facebook' | 'github' | string;
+};

@@ -1,45 +1,26 @@
-'use client';
-import { jwtDecode } from 'jwt-decode';
-import {
-    LoginPayload,
-    AuthResponse,
-    User
-} from '../types';
-import { API_BASE_URL } from './config';
+import { ApiClient } from './apiClient';
+import { parseToken } from './tokenUtils';
+import { AuthResponse, LoginPayload, OTPPayload, SocialAuthPayload } from '../types';
 
-export const loginRequest = async (credentials: LoginPayload): Promise<AuthResponse> => {
-  const response = await fetch(`${API_BASE_URL}/auth/login`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(credentials)
-  });
+const api = new ApiClient();
 
-  if (!response.ok) {
-    const errorMessage = await response.text();
-    throw new Error(errorMessage || 'Login failed');
-  }
+export const loginWithCredentials = async (credentials: LoginPayload): Promise<AuthResponse> => {
+  const data = await api.post<{ accessToken: string; message: string }>('/auth/login', credentials);
+  const user = parseToken(data.accessToken);
+  return { isAuthenticated: true, accessToken: data.accessToken, message: data.message, user };
+};
 
-  const data = await response.json();
+export const loginWithSocial = async (payload: SocialAuthPayload): Promise<AuthResponse> => {
+  const data = await api.post<{ accessToken: string; message: string }>(
+    `/auth/${payload.provider}/callback`,
+    { code: payload.code }
+  );
+  const user = parseToken(data.accessToken);
+  return { isAuthenticated: true, accessToken: data.accessToken, message: data.message, user };
+};
 
-  const token: string = data.accessToken;
-  if (!token) throw new Error('No access token returned from server.');
-
-  const decoded: User = jwtDecode(token);
-
-  const user: User = {
-    id: decoded.id,
-    email: decoded.email,
-    name: decoded.name,
-    role: decoded.role,
-    avatarUrl: decoded.avatarUrl
-  };
-
-  return {
-    isAuthenticated: true,
-    message: data.message,
-    accessToken: token,
-    user
-  };
+export const loginWithOTP = async (payload: OTPPayload): Promise<AuthResponse> => {
+  const data = await api.post<{ accessToken: string; message: string }>('/auth/otp/verify', payload);
+  const user = parseToken(data.accessToken);
+  return { isAuthenticated: true, accessToken: data.accessToken, message: data.message, user };
 };
