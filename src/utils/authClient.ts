@@ -11,13 +11,39 @@ export const loginWithCredentials = async (credentials: LoginPayload): Promise<A
 };
 
 export const loginWithSocial = async (payload: SocialAuthPayload): Promise<AuthResponse> => {
-  const data = await api.post<{ accessToken: string; message: string }>(
-    `/auth/${payload.provider}/callback`,
-    { code: payload.code }
-  );
-  const user = parseToken(data.accessToken);
-  return { isAuthenticated: true, accessToken: data.accessToken, message: data.message, user };
+  return new Promise<AuthResponse>((resolve, reject) => {
+    const oauthWindow = window.open(
+      `${process.env.NEXT_PUBLIC_API_URL}/auth/${payload.provider}`,
+      '_blank',
+      'width=500,height=600'
+    );
+
+    const messageListener = async (event: MessageEvent) => {
+      // You may want to verify event.origin here for security
+      if (event.data?.accessToken) {
+        try {
+          const user = parseToken(event.data.accessToken);
+          resolve({
+            isAuthenticated: true,
+            accessToken: event.data.accessToken,
+            message: 'Login successful',
+            user,
+          });
+        } catch (err) {
+          reject(err);
+        } finally {
+          window.removeEventListener('message', messageListener);
+          oauthWindow?.close();
+        }
+      }
+    };
+
+    window.addEventListener('message', messageListener);
+
+    // Optional: timeout or cancel logic
+  });
 };
+
 
 export const loginWithOTP = async (payload: OTPPayload): Promise<AuthResponse> => {
   const data = await api.post<{ accessToken: string; message: string }>('/auth/otp/verify', payload);
