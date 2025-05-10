@@ -13,7 +13,16 @@
       "skipLibCheck": true,                       // Skip checking .d.ts from node_modules
       "forceConsistentCasingInFileNames": true,   // Enforce import casing
       "strict": true,                              // Enable all strict type-checking
-      "types": ["node"]
+      "types": ["node"],
+      "paths": {
+        "@/*": ["./src/*"],
+        "@/components/*": ["./src/components/*"],
+        "@/context/*": ["./src/context/*"],
+        "@/hoc/*": ["./src/hoc/*"],
+        "@/hooks/*": ["./src/hooks/*"],
+        "@/types/*": ["./src/types/*"],
+        "@/utils/*": ["./src/utils/*"]
+      }
     },
     "include": ["src"],
     "exclude": ["dist", "node_modules", "example"]

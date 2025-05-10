@@ -37,7 +37,7 @@ export interface AuthContextType {
   isAuthenticated: boolean;
   loading: boolean;
   login: (credentials: LoginPayload) => Promise<void>;
-  socialLogin: (payload: SocialAuthPayload) => Promise<void>;
+  socialLogin: (payload: SocialAuthPayload) => void;
   logout: () => void;
   loginError: string | null;
 }
@@ -84,5 +84,5 @@ export type OTPPayload = {
 
 export type SocialAuthPayload = {
   code: string;
-  provider: 'google' | 'facebook' | 'github' | string;
+  provider: 'google' | 'facebook' | 'github';
 };

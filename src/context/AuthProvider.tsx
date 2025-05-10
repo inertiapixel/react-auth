@@ -2,18 +2,24 @@
 
 import { createContext, useState, useEffect, FC } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { getToken, setToken, removeToken } from '../utils/tokenStorage';
-import { loginWithCredentials, loginWithSocial } from '../utils/authClient';
-import { parseToken } from '../utils/tokenUtils';
+import { getToken, setToken, removeToken } from '@/utils/tokenStorage';
+
+import {
+  loginWithCredentials,
+  // loginWithOTP,
+  socialLogin
+} from '@/utils/auth';
+
+import { parseToken } from '@/utils/tokenUtils';
 import {
   AuthContextType,
   AuthProviderProps,
   User,
   AuthResponse,
   LoginPayload,
-  SocialAuthPayload,
-} from '../types';
-import { API_BASE_URL } from '../utils/config';
+  // SocialAuthPayload,
+} from '@/types';
+import { API_BASE_URL } from '@/utils/config';
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -53,15 +59,15 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children, config }) => {
     }
   };
 
-  const socialLogin = async (payload: SocialAuthPayload): Promise<void> => {
-    setLoginError(null);
-    try {
-      const response: AuthResponse = await loginWithSocial(payload);
-      handleAuthSuccess(response);
-    } catch (error) {
-      handleAuthFailure(error);
-    }
-  };
+  // const socialLogin = async (payload: SocialAuthPayload): Promise<void> => {
+  //   setLoginError(null);
+  //   try {
+  //     const response: AuthResponse = await loginWithSocial(payload);
+  //     handleAuthSuccess(response);
+  //   } catch (error) {
+  //     handleAuthFailure(error);
+  //   }
+  // };
 
   const handleAuthSuccess = (response: AuthResponse) => {
     if (!response.accessToken) {
