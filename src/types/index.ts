@@ -1,5 +1,7 @@
 import { ReactNode } from "react";
 
+export type OAuthProvider = 'google' | 'facebook' | 'github';
+
 export interface User<T = unknown> {
   id: string;
   name: string;
@@ -83,6 +85,5 @@ export type OTPPayload = {
 };
 
 export type SocialAuthPayload = {
-  code: string;
-  provider: 'google' | 'facebook' | 'github';
+  provider: OAuthProvider;
 };

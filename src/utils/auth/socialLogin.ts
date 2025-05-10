@@ -1,9 +1,6 @@
 import { API_BASE_URL } from '@/utils/config';
-import { OAUTH_PROVIDERS, OAuthProvider } from './providers';
-
-export type SocialAuthPayload = {
-  provider: OAuthProvider;
-};
+import { OAUTH_PROVIDERS } from './providers';
+import { SocialAuthPayload } from '@/types';
 
 export const socialLogin = ({ provider }: SocialAuthPayload): void => {
   const config = OAUTH_PROVIDERS[provider];

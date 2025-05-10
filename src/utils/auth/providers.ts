@@ -1,4 +1,4 @@
-export type OAuthProvider = 'google' | 'facebook' | 'github';
+import { OAuthProvider } from "@/types";
 
 export type OAuthProviderConfig = {
   authEndpoint: string;
