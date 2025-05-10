@@ -18,6 +18,7 @@ export const useAuth = (redirectIfNotAuthenticated = '/login') => {
     loginError,
     login,
     logout,
+    socialLogin
   } = context;
 
   const [isLoaded, setIsLoaded] = useState(false);
@@ -58,6 +59,7 @@ export const useAuth = (redirectIfNotAuthenticated = '/login') => {
     loginError,
     login,
     logout,
+    socialLogin
   };
 };
 
