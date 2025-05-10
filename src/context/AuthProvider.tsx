@@ -2,15 +2,9 @@
 
 import { createContext, useState, useEffect, FC } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { getToken, setToken, removeToken } from '@/utils/tokenStorage';
+import { getToken, setToken, removeToken } from '../utils/tokenStorage';
 
-import {
-  loginWithCredentials,
-  // loginWithOTP,
-  socialLogin
-} from '@/utils/auth';
-
-import { parseToken } from '@/utils/tokenUtils';
+import { parseToken } from '../utils/tokenUtils';
 import {
   AuthContextType,
   AuthProviderProps,
@@ -18,8 +12,9 @@ import {
   AuthResponse,
   LoginPayload,
   // SocialAuthPayload,
-} from '@/types';
-import { API_BASE_URL } from '@/utils/config';
+} from '../types';
+import { API_BASE_URL } from '../utils/config';
+import { loginWithCredentials, socialLogin } from '../utils/auth';
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 

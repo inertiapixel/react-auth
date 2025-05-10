@@ -1,6 +1,6 @@
-import { ApiClient } from '@/utils/apiClient';
-import { parseToken } from '@/utils/tokenUtils';
-import { AuthResponse, LoginPayload } from '@/types';
+import { AuthResponse, LoginPayload } from "../../types";
+import { ApiClient } from "../apiClient";
+import { parseToken } from "../tokenUtils";
 
 const api = new ApiClient();
 
